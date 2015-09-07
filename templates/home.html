@@ -1,0 +1,33 @@
+{% extends "_base.html" %}
+
+
+{% block content %}
+
+<div class="text-center">
+  {% load staticfiles %}
+  <br>
+  <img src="http://blog.daocloud.io/wp-content/uploads/2015/09/django.png">
+  <br>
+  <p>这个页面已经被访问了 <strong>{{counter}}</strong> 次啦!｡◕‿◕｡</p>
+</div>
+
+<br>
+
+<form action="/" method="POST">
+  {% csrf_token %}
+  <div class="form-group">
+    <input name="item_text" class="form-control input-lg" type="text" placeholder="输入留言" required>
+  </div>
+  <input type="submit" class="btn btn-success btn-lg btn-block" value="提交">
+</form>
+
+<br>
+<hr>
+
+<div>
+  {% for item in items %}
+    <h4 class="well"><strong>{{item.text}}</strong> - <em>{{item.date_posted}}</em></h4>
+  {% endfor %}
+</div>
+
+{% endblock content %}
