@@ -1,129 +1,238 @@
-## 如何开发一个 Django 的生产级 Docker 化应用
 
-> 目标：我们将之前实现的**Django + MySQL + Redis**  留言板应用 ，送上云端 ，轻松实现代码的持续集成和持续部署 。
+
+### 如何配置基于 Docker 持续集成的Django开发环境
+
+> 目标：用 Docker 为搭建一套 持续集成的 Django 开发环境 。
 > 
-> 本项目代码维护在 [DaoCloud/python-django-cd-sample](https://github.com/DaoCloud/python-django-cd-sample)项目中 。
+> 本项目代码维护在 **[DaoCloud/python-django-sample](https://github.com/DaoCloud/python-django-sample)** 项目中。
 
 
 
-工欲善其器 ，必先利其器 。首先 ，你需要  `DaoCloud 帐号` `DaoCloud 帐号` `DaoCloud 帐号`
+### 前言
 
-
-
-#### 云端镜像构建
-
-> 比起本地创建，在云端创建会更简单。
-
-第一步：在控制台点击「代码构建」。
-
-![](http://help.daocloud.io/img/screenshots/features/build-flows/dashboard.png)
-
----
-
-第二步：在「代码构建」的界面中点击「创建新项目」。
-
-![](http://help.daocloud.io/img/screenshots/features/build-flows/build-flows-index.png)
-
----
-
-第三步：为项目指定「项目名称」
-
-稍等片刻 ，应用便在云端构建成咯
-
-
-
-#### 云端部署镜像
-
-第零步：在控制台点击「服务集成」，创建 mysql 和 redis 服务
-
-第一步：在控制台点击「镜像仓库」。
-
-第二步：在「代码构建」的界面中找到需要部署的镜像 ，点击「部署」。
-
-第三步：按照为项目指定「项目名称」， 并在 「基础设置」中 绑定上  mysql 和 redis 服务 。
-
----
-
-应用便在云端航行起来咯  ｡◕‿◕｡
-
-
-
-### 云端持续集成
-
-我们需要写一些测试代码 。
-
-``` python
-# /chat/tests.py
-from django.test import TestCase
-from django.test.client import Client
-
-
-# Create your tests here.
-class ChatTests(TestCase):
-    client_class = Client
-
-    def test(self):
-        self.assertEqual(1 + 1, 2)
-
-```
-
-本地环境下可以使用以下命令来启动测试：
+工欲善其事 ，必先利其器 。 这次我们将使用 
 
 ``` 
-./manage.py test
+docker >= 1.8.0
+docker-machine >= 0.4.1
+docker-compose >= 1.4.0
+```
+
+等工具 ，实现 基于 Docker化持续性集成的Django开发环境 。
+
+#### Docker:
+
+> 一款轻量级虚拟化容器的管理引擎 。 Docker Daemon ,  Client , Registry , Libcontainer … 组成
+
+#### Docker-Client:
+
+> Docker架构中用户与 Docker Daemon 建立通信的客户端 。
+
+#### Docker-Daemon:
+
+> Docker架构中常驻后台的系统进程 , 负责接收处理用户发送的请求和管理所有的 Docker 容器 ，所谓的 **运行 Docker** 即代表 **运行 Docker Daemon** 。
+
+#### Docker-Machine
+
+> Docker 官方推荐部署工具 。 帮助用户快速在运行环境中创建虚拟机服务节点 。 在虚拟机中安装并配置 Docker Client ， 使得 Docker Client 能快捷的与虚拟中的 Docker 建立通信 。
+
+#### Docker-Compose
+
+> Docker 官方推荐服务编排工具 。随着服务的复杂度增长 ，容器管理的配置项冗长 。 Compose 可有效缓解甚至解决容器部署的复杂性 。
+
+
+
+### 通过 Docker-Machine 安装 Docker
+
+> 如果你是windows 或 mac用户 推荐阅读以下章节， 如何使用 docker machine 安装与管理 docker 
+
+``` bash
+$ docker-machine create -d virtualbox dev;
+INFO[0000] Creating CA: /Users/dev/.docker/machine/certs/ca.pem
+INFO[0000] Creating client certificate: /Users/dev/.docker/machine/certs/cert.pem
+INFO[0001] Downloading boot2docker.iso to /Users/dev/.docker/machine/cache/boot2docker.iso...
+INFO[0035] Creating SSH key...
+INFO[0035] Creating VirtualBox VM...
+INFO[0043] Starting VirtualBox VM...
+INFO[0044] Waiting for VM to start...
+INFO[0094] "dev" has been created and is now the active machine.
+To point your Docker client at it, run this in your shell: $(docker-machine env dev)
 ```
 
 
 
-当我们写完测试代码之后，我们需要一个持续集成环境来自动执行测试，报告项目的健康状况。
+通过 `create`命令 启动了一台 machine 名为dev）， 并安装好了 Docker 。
 
-我们只需要在源代码的根目录放置 `daocloud.yml` 文件便可以接入 DaoCloud 持续集成系统，每一次源代码的变更都会触发一次 DaoCloud 持续集成。关于 `daocloud.yml` 的格式，请参考 **这里**。
+> 因为 Create 命令在初始化的时候 ，会从海外下载一个 ISO 镜像 。
+> 
+> 可以通过以下办法进行加速 。
+> 
+> MAC
+> 
+> ``` bash
+> $ mkdir ~/.boot2docker
+> $ echo ISOURL = \"https://get.daocloud.io/boot2docker/boot2docker-lastest.iso\" > ~/.boot2docker/profile
+> ```
+> 
+> Win
+> 
+> ``` bash
+> $ ISOURL = "https://get.daocloud.io/boot2docker/boot2docker-lastest.iso"
+> ```
 
-daocloud.yml
+
+
+通过 
+
+``` bash
+ $ eval "$(docker-machine env dev)"
+```
+
+将当前的 Docker Client 和 DEV 上的 Docker 建立起通信 。
+
+
+
+运行
+
+``` bash
+$ docker-machine ls
+NAME   ACTIVE   DRIVER       STATE     URL
+dev    *        virtualbox   Running   tcp://192.168.99.100:2376
+
+```
+
+查看当前 所有正在运行的 Machines 。
+
+
+
+``` bash
+$ docker-machine start dev
+Starting VM ...
+```
+
+启动 machie ( dev )
+
+
+
+``` bash
+$ docker-machine ip dev
+192.168.99.100
+```
+
+获取 machie ( dev )  的 IP
+
+
+
+``` bash
+$ docker-machine ssh dev
+Starting VM ...
+```
+
+通过 ssh 进入 machie ( dev )
+
+
+
+#### 通过 Docker Compose 编排应用
+
+docker-compose.yml
 
 ``` yaml
-image: daocloud/ci-python:2.7
-services:
-    - mysql
-    - redis
+web:
+  build: .
+  ports:
+    - "8000:8000"
+  links:
+    - mysql:mysql
+    - redis:redis
+  env_file: .env
+  volume: . /code
+  command: /code/manage.py runserver 0.0.0.0:8000
 
-env:
-    - DAO_TEST = "True"
-    - MYSQL_INSTANCE_NAME = "test"
-    - MYSQL_USERNAME = "root"
-    - MYSQL_PASSWORD = ""
+mysql:
+  image: mysql:latest
+  environment:
+    - MYSQL_DATABASE=django
+    - MYSQL_ROOT_PASSWORD=mysql
+  ports:
+    - "3306:3306"
 
-install:
-    - pip install coverage
+redis:
+  image: redis:latest
+  ports:
+    - "6379:6379"
 
-before_script:
-    - pip install -r requirements.txt
-
-script:
-    - coverage run --source='.' manage.py test
-    - coverage report
 ```
 
-之后的每一次 git push 都会触发持续集成 。
+在这个文件中 。 我们定义了 3个微服务 `web`  ，`mysql`  ， `redis`  。 
 
-DaoCloud 在持续集成结束后还会有萌哒哒的结果报告。
+通过`build / image` 为微服务指定了docker 镜像 。 
+
+通过 `links`  ，为 web 关联了 mysql 与 redis 服务 。
+
+通过 `ports`  ，为微服务映射相应的端口 。
+
+通过`command ` , 为微服务配置启动时执行的命令 （ 可覆盖 Dockerfile 里的声明 ）
+
+通过`volume` , 将源码挂载至服务中 。 保证代码即时更新至开发环境中 。  
+
+
+
+万事俱备 ， 现在让我们来让应用运行起俩 ， 构建镜像并运行服务：
+
+``` bash
+$ docker-compose build
+$ docker-compose up -d
+```
+
+
+
+别忘记要为项目初始化数据库哦
+
+``` bash
+$ docker-compose run web /usr/local/bin/python manage.py migrate
+```
+
+
+
+这样 我们的 Demo 就可以通过浏览器来访问了 ：）
 
 
 
 
 
-#### 云端持续部署
-
-只需要给 Git commit 打上标签
+！！！ 如果是使用 docker machie 的读者 。 你需要用
 
 ``` 
-git tag v1.0
-git push --tag
+ docker machine ip dev 
 ```
 
-即可触发云端的镜像构建
+获取到实际运行环境的 IP 。 访问 <ip>:8000
 
 
 
-在容器部署页面开启自动更新 。 即可完成云端的持续部署
+如果是 Linux 的读者 。 直接使用 127.0.0.1:8000 即可
+
+
+
+![](http://i3.tietuku.com/5a046900b9e8652b.png)
+
+
+
+#### 总结
+
+- docker machine 安装 docker
+
+
+- docker compose 编排业务
+
+
+- 通过volume挂载代码进入 容器
+
+
+- 在开发状态下 容器只是单纯的运行环境
+
+
+- 通过 docker compose run web xxx执行 xxx 指令
+
+
 
