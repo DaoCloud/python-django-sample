@@ -141,7 +141,7 @@ redis:
 
 在这个文件中。我们定义了 3 个微服务 `web`、`mysql`、`redis`。
 
-- 通过 `build/image` 为微服务指定了 Docker 镜像
+- 通过 `build/image`，为微服务指定了 Docker 镜像
 - 通过 `links`，为 `web` 关联了 `mysql` 与 `redis` 服务
 - 通过 `ports`，指定该服务需要公开的端口
 - 通过 `command`，指定该服务启动时执行的命令（可覆盖 Dockerfile 里的声明）
