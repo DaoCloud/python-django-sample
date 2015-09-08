@@ -9,7 +9,7 @@ web:
   command: /code/manage.py runserver 0.0.0.0:8000
 
 mysql:
-  image: mysql:latest
+  image: daocloud.io/mysql:latest
   environment:
     - MYSQL_DATABASE=django
     - MYSQL_ROOT_PASSWORD=mysql
@@ -17,7 +17,7 @@ mysql:
     - "3306:3306"
 
 redis:
-  image: redis:latest
+  image: daocloud.io/redis:latest
   ports:
     - "6379:6379"
 

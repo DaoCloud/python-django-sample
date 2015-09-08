@@ -1,6 +1,6 @@
-## 如何配置基于 Docker 持续集成的 Django 开发环境
+## 如何用 Docker Compose 配置 Django 应用开发环境
 
-> 目标：用 Docker 为搭建一套 持续集成的 Django 开发环境。
+> 目标：搭建基于 Docker 的 Django 应用开发环境。
 > 
 > 本项目代码维护在 **[DaoCloud/python-django-sample](https://github.com/DaoCloud/python-django-sample)** 项目中。
 >
@@ -14,33 +14,33 @@
 - Docker Machine >= 0.4.1
 - Docker Compose >= 1.4.0
 
-等工具，实现基于 Docker 化持续性集成的 Django 开发环境。
+等工具，配置基于 Docker 的 Django 开发环境。
 
 #### Docker
 
-一款轻量级虚拟化容器的管理引擎，由 Docker Daemon、Docker Client、Docker Registry、libcontainer……组成。
-
-#### Docker Client
-
-Docker 架构中用户与 Docker Daemon 建立通信的客户端。
+一款轻量级容器管理引擎，由 Docker Daemon、Docker Client组成。
 
 #### Docker Daemon
 
 Docker 架构中常驻后台的系统进程，负责接收处理用户发送的请求和管理所有的 Docker 容器，所谓的 **运行 Docker** 即代表 **运行 Docker Daemon**。
 
+#### Docker Client
+
+Docker 架构中用户与 Docker Daemon 建立通信的客户端。
+
 #### Docker Machine
 
-Docker 官方推荐部署工具。帮助用户快速在运行环境中创建虚拟机服务节点，在虚拟机中安装并配置 Docke，最终帮助用户配置 Docker Client，使得 Docker Client 有能力与虚拟机中的 Docker 建立通信。
+Docker 官方提供的部署工具。帮助用户快速在运行环境中创建虚拟机服务节点，在虚拟机中安装并配置 Docker，最终帮助用户配置 Docker Client，使得 Docker Client 有能力与虚拟机中的 Docker 建立通信。
 
 #### Docker Compose
 
-Docker 官方推荐服务编排工具。随着服务的复杂度增长，容器管理过程的配置项将变得冗长，Compose 可有效帮助用户缓解甚至解决容器部署的复杂性。
+Docker 官方提供的容器编排工具。随着服务的复杂度增长，容器管理过程的配置项将变得冗长，Compose 可有效帮助用户缓解甚至解决容器部署的复杂性。
 
 #### 通过 Docker Machine 安装 Docker
 
 > 如果你是 Windows 或 OS X 用户推荐阅读以下章节，将指导您使用 Docker Machine 安装与管理 Docker。
 
-- 首先通过 `create` 命令以 VirtualBox 为驱动创建一台名为 dev 的虚拟机，并已经安装好了 Docker。
+- 首先通过 `create` 命令创建一台名为 dev 的 VirtualBox 虚拟机，并已经安装好了 Docker。
 
 ``` bash
 $ docker-machine create -d virtualbox dev;
@@ -111,6 +111,8 @@ Starting VM ...
 
 #### 通过 Docker Compose 编排应用
 
+> 因所有官方镜像均位于境外服务器，为了确保所有示例能正常运行，示例中使用与官方镜像保持同步的 DaoCloud 境内镜像：
+
 *docker-compose.yml*
 
 ``` yaml
@@ -126,7 +128,7 @@ web:
   command: /code/manage.py runserver 0.0.0.0:8000
 
 mysql:
-  image: mysql:latest
+  image: daocloud.io/mysql:latest
   environment:
     - MYSQL_DATABASE=django
     - MYSQL_ROOT_PASSWORD=mysql
@@ -134,15 +136,15 @@ mysql:
     - "3306:3306"
 
 redis:
-  image: redis:latest
+  image: daocloud.io/redis:latest
   ports:
     - "6379:6379"
 ```
 
-在这个文件中。我们定义了 3 个微服务 `web`、`mysql`、`redis`。
+在这个文件中。我们定义了 3 个 Docker 微服务 `web`、`mysql`、`redis`。
 
 - 通过 `build/image`，为微服务指定了 Docker 镜像
-- 通过 `links`，为 `web` 关联了 `mysql` 与 `redis` 服务
+- 通过 `links`，为 `web` 关联 `mysql` 与 `redis` 服务
 - 通过 `ports`，指定该服务需要公开的端口
 - 通过 `command`，指定该服务启动时执行的命令（可覆盖 Dockerfile 里的声明）
 - 通过 `volume`，将源码挂载至服务中，保证代码即时更新至开发环境中
@@ -170,7 +172,7 @@ $ docker-machine ip dev
 
 获取容器实际运行环境的 IP，并访问 `<ip>:8000`。
 
-如果是 Linux 的读者，则直接使用 `127.0.0.1:8000` 即可。不出意外的话，您应该可以看到如下页面：
+对于 Docker 安装在本地 Linux 机器上的读者，则直接使用 `127.0.0.1:8000` 即可。不出意外的话，您应该可以看到如下页面：
 
 ![](http://i3.tietuku.com/5a046900b9e8652b.png)
 
@@ -180,4 +182,4 @@ $ docker-machine ip dev
 - Docker Compose 编排服务
 - 通过 Volume 将代码挂载入容器
 - 在开发状态下，容器只是单纯的运行环境
-- 通过 `docker-compose run web xxx` 执行 `xxx` 指令
+- 通过 `docker-compose run service xxx` 执行 `xxx` 指令
