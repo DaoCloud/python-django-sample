@@ -1,44 +1,46 @@
-### 如何配置基于 Docker 持续集成的 Django 开发环境
+## 如何配置基于 Docker 持续集成的 Django 开发环境
 
 > 目标：用 Docker 为搭建一套 持续集成的 Django 开发环境。
 > 
 > 本项目代码维护在 **[DaoCloud/python-django-sample](https://github.com/DaoCloud/python-django-sample)** 项目中。
+>
+> 您可以在 GitHub 找到本项目并获取本文中所提到的所有代码文件。
 
 ### 前言
 
 工欲善其事，必先利其器。这次我们将使用：
 
-``` 
-docker >= 1.8.0
-docker-machine >= 0.4.1
-docker-compose >= 1.4.0
-```
+- Docker >= 1.8.0
+- Docker Machine >= 0.4.1
+- Docker Compose >= 1.4.0
 
 等工具，实现基于 Docker 化持续性集成的 Django 开发环境。
 
-#### Docker:
+#### Docker
 
-> 一款轻量级虚拟化容器的管理引擎。Docker Daemon、Client、Registry、Libcontainer……组成。
+一款轻量级虚拟化容器的管理引擎，由 Docker Daemon、Docker Client、Docker Registry、libcontainer……组成。
 
-#### Docker-Client:
+#### Docker Client
 
-> Docker 架构中用户与 Docker Daemon 建立通信的客户端。
+Docker 架构中用户与 Docker Daemon 建立通信的客户端。
 
-#### Docker-Daemon:
+#### Docker Daemon
 
-> Docker 架构中常驻后台的系统进程，负责接收处理用户发送的请求和管理所有的 Docker 容器，所谓的 **运行 Docker** 即代表 **运行 Docker Daemon**。
+Docker 架构中常驻后台的系统进程，负责接收处理用户发送的请求和管理所有的 Docker 容器，所谓的 **运行 Docker** 即代表 **运行 Docker Daemon**。
 
-#### Docker-Machine
+#### Docker Machine
 
-> Docker 官方推荐部署工具。帮助用户快速在运行环境中创建虚拟机服务节点。在虚拟机中安装并配置 Docker Client，使得 Docker Client 能快捷的与虚拟中的 Docker 建立通信。
+Docker 官方推荐部署工具。帮助用户快速在运行环境中创建虚拟机服务节点，在虚拟机中安装并配置 Docke，最终帮助用户配置 Docker Client，使得 Docker Client 有能力与虚拟机中的 Docker 建立通信。
 
-#### Docker-Compose
+#### Docker Compose
 
-> Docker 官方推荐服务编排工具。随着服务的复杂度增长，容器管理的配置项冗长。Compose 可有效缓解甚至解决容器部署的复杂性。
+Docker 官方推荐服务编排工具。随着服务的复杂度增长，容器管理过程的配置项将变得冗长，Compose 可有效帮助用户缓解甚至解决容器部署的复杂性。
 
-### 通过 Docker-Machine 安装 Docker
+#### 通过 Docker Machine 安装 Docker
 
-> 如果你是 Windows 或 Mac 用户 推荐阅读以下章节，如何使用 docker machine 安装与管理 docker 
+> 如果你是 Windows 或 OS X 用户推荐阅读以下章节，将指导您使用 Docker Machine 安装与管理 Docker。
+
+- 首先通过 `create` 命令以 VirtualBox 为驱动创建一台名为 dev 的虚拟机，并已经安装好了 Docker。
 
 ``` bash
 $ docker-machine create -d virtualbox dev;
@@ -52,14 +54,13 @@ INFO[0044] Waiting for VM to start...
 INFO[0094] "dev" has been created and is now the active machine.
 To point your Docker client at it, run this in your shell: $(docker-machine env dev)
 ```
-
-通过 `create` 命令启动了一台 machine 名为 dev，并安装好了 Docker。
-
-> 因为 Create 命令在初始化的时候，会从海外下载一个 ISO 镜像。
+> ##### 提示
+>
+> 由于 `create` 命令在初始化的时候，会从海外下载一个 ISO 镜像，由于国内网络不稳定，所以可能会在这一步耗费很长时间。
 > 
-> 可以通过以下办法进行加速。
+> 我们可以通过以下办法进行加速。
 > 
-> MAC
+> OS X
 > 
 > ``` bash
 > $ mkdir ~/.boot2docker
@@ -72,15 +73,13 @@ To point your Docker client at it, run this in your shell: $(docker-machine env 
 > $ ISOURL = "https://get.daocloud.io/boot2docker/boot2docker-lastest.iso"
 > ```
 
-通过 
+- 设置环境变量以将本机的 Docker Client 和 dev 上的 Docker Daemon 建立通信。
 
 ``` bash
 $ eval "$(docker-machine env dev)"
 ```
 
-将当前的 Docker Client 和 dev 上的 Docker 建立起通信。
-
-运行
+- 查看当前所有正在运行的 Machines
 
 ``` bash
 $ docker-machine ls
@@ -89,32 +88,30 @@ dev    *        virtualbox   Running   tcp://192.168.99.100:2376
 
 ```
 
-查看当前 所有正在运行的 Machines。
+- 启动 Machine(dev)
 
 ``` bash
 $ docker-machine start dev
 Starting VM ...
 ```
 
-启动 machine(dev)
+- 获取 Machine(dev) 的 IP
 
 ``` bash
 $ docker-machine ip dev
 192.168.99.100
 ```
 
-获取 machine(dev) 的 IP
+- 通过 SSH 进入 Machine(dev)
 
 ``` bash
 $ docker-machine ssh dev
 Starting VM ...
 ```
 
-通过 ssh 进入 machine(dev)
-
 #### 通过 Docker Compose 编排应用
 
-docker-compose.yml
+*docker-compose.yml*
 
 ``` yaml
 web:
@@ -140,22 +137,17 @@ redis:
   image: redis:latest
   ports:
     - "6379:6379"
-
 ```
 
 在这个文件中。我们定义了 3 个微服务 `web`、`mysql`、`redis`。
 
-通过 `build/image` 为微服务指定了 docker 镜像。
+- 通过 `build/image` 为微服务指定了 Docker 镜像
+- 通过 `links`，为 `web` 关联了 `mysql` 与 `redis` 服务
+- 通过 `ports`，指定该服务需要公开的端口
+- 通过 `command`，指定该服务启动时执行的命令（可覆盖 Dockerfile 里的声明）
+- 通过 `volume`，将源码挂载至服务中，保证代码即时更新至开发环境中
 
-通过 `links`，为 web 关联了 mysql 与 redis 服务。
-
-通过 `ports`，为微服务映射相应的端口。
-
-通过 `command`，为微服务配置启动时执行的命令（可覆盖 Dockerfile 里的声明）。
-
-通过 `volume`，将源码挂载至服务中。保证代码即时更新至开发环境中。
-
-万事俱备，现在让我们来让应用运行起俩，构建镜像并运行服务：
+现在万事俱备，该让我们使应用运行起来啦，构建镜像并运行服务：
 
 ``` bash
 $ docker-compose build
@@ -170,24 +162,22 @@ $ docker-compose run web /usr/local/bin/python manage.py migrate
 
 这样我们的 Demo 就可以通过浏览器来访问了：）
 
-
-！！！ 如果是使用 docker machine 的读者。你需要用
+**！！！**如果是使用 Docker Machine 的读者，您需要用
 
 ``` bash
-$ docker-machine ip dev 
+$ docker-machine ip dev
 ```
 
-获取到实际运行环境的 IP，访问 `<ip>:8000`。
+获取容器实际运行环境的 IP，并访问 `<ip>:8000`。
 
-
-如果是 Linux 的读者，直接使用 127.0.0.1:8000 即可：
+如果是 Linux 的读者，则直接使用 `127.0.0.1:8000` 即可。不出意外的话，您应该可以看到如下页面：
 
 ![](http://i3.tietuku.com/5a046900b9e8652b.png)
 
 #### 总结
 
-- docker machine 安装 docker
-- docker compose 编排业务
-- 通过 volume 挂载代码进入 容器
-- 在开发状态下 容器只是单纯的运行环境
-- 通过 `docker compose run web xxx` 执行 xxx 指令
+- Docker Machine 安装 Docker
+- Docker Compose 编排服务
+- 通过 Volume 将代码挂载入容器
+- 在开发状态下，容器只是单纯的运行环境
+- 通过 `docker-compose run web xxx` 执行 `xxx` 指令
