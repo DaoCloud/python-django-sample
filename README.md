@@ -175,7 +175,7 @@ $ docker-machine ip dev
 
 对于 Docker 安装在本地 Linux 机器上的读者，则直接使用 `127.0.0.1:8000` 即可。不出意外的话，您应该可以看到如下页面：
 
-![](http://i3.tietuku.com/5a046900b9e8652b.png)
+![](http://7xi8kv.com5.z0.glb.qiniucdn.com/python-django-sample-pic.png)
 
 #### 总结
 
