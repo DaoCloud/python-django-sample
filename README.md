@@ -10,19 +10,19 @@
 
 工欲善其事，必先利其器。这次我们将使用：
 
-- Docker >= 1.8.0
-- Docker Machine >= 0.4.1
-- Docker Compose >= 1.4.0
+* Docker >= 1.8.0
+* Docker Machine >= 0.4.1
+* Docker Compose >= 1.4.0
 
 等工具，配置基于 Docker 的 Django 开发环境。
 
 #### Docker
 
-一款轻量级容器管理引擎，由 Docker Daemon、Docker Client组成。
+一款轻量级容器管理引擎，由 Docker Daemon、Docker Client 组成。
 
 #### Docker Daemon
 
-Docker 架构中常驻后台的系统进程，负责接收处理用户发送的请求和管理所有的 Docker 容器，所谓的 **运行 Docker** 即代表 **运行 Docker Daemon**。
+Docker 架构中常驻后台的系统进程，负责接收处理用户发送的请求和管理所有的 Docker 容器，所谓的**运行 Docker** 即代表**运行 Docker Daemon**。
 
 #### Docker Client
 
@@ -40,9 +40,9 @@ Docker 官方提供的容器编排工具。随着服务的复杂度增长，容�
 
 > 如果你是 Windows 或 OS X 用户推荐阅读以下章节，将指导您使用 Docker Machine 安装与管理 Docker。
 
-- 首先通过 `create` 命令创建一台名为 dev 的 VirtualBox 虚拟机，并已经安装好了 Docker。
+* 首先通过 `create` 命令创建一台名为 dev 的 VirtualBox 虚拟机，并已经安装好了 Docker。
 
-``` bash
+```bash
 $ docker-machine create -d virtualbox dev;
 INFO[0000] Creating CA: /Users/dev/.docker/machine/certs/ca.pem
 INFO[0000] Creating client certificate: /Users/dev/.docker/machine/certs/cert.pem
@@ -54,7 +54,8 @@ INFO[0044] Waiting for VM to start...
 INFO[0094] "dev" has been created and is now the active machine.
 To point your Docker client at it, run this in your shell: $(docker-machine env dev)
 ```
-> ##### 提示
+
+> **提示**
 >
 > 由于 `create` 命令在初始化的时候，会从海外下载一个 ISO 镜像，由于国内网络不稳定，所以可能会在这一步耗费很长时间。
 > 
@@ -62,49 +63,49 @@ To point your Docker client at it, run this in your shell: $(docker-machine env 
 > 
 > OS X
 > 
-> ``` bash
+> ```bash
 > $ mkdir ~/.boot2docker
 > $ echo ISOURL = \"https://get.daocloud.io/boot2docker/boot2docker-lastest.iso\" > ~/.boot2docker/profile
 > ```
 > 
 > Win
 > 
-> ``` bash
+> ```bash
 > $ ISOURL = "https://get.daocloud.io/boot2docker/boot2docker-lastest.iso"
 > ```
 
-- 设置环境变量以将本机的 Docker Client 和 dev 上的 Docker Daemon 建立通信。
+* 设置环境变量以将本机的 Docker Client 和 dev 上的 Docker Daemon 建立通信。
 
-``` bash
+```bash
 $ eval "$(docker-machine env dev)"
 ```
 
-- 查看当前所有正在运行的 Machines
+* 查看当前所有正在运行的 Machines
 
-``` bash
+```bash
 $ docker-machine ls
 NAME   ACTIVE   DRIVER       STATE     URL
 dev    *        virtualbox   Running   tcp://192.168.99.100:2376
 
 ```
 
-- 启动 Machine(dev)
+* 启动 Machine(dev)
 
-``` bash
+```bash
 $ docker-machine start dev
 Starting VM ...
 ```
 
-- 获取 Machine(dev) 的 IP
+* 获取 Machine(dev) 的 IP
 
-``` bash
+```bash
 $ docker-machine ip dev
 192.168.99.100
 ```
 
-- 通过 SSH 进入 Machine(dev)
+* 通过 SSH 进入 Machine(dev)
 
-``` bash
+```bash
 $ docker-machine ssh dev
 Starting VM ...
 ```
@@ -115,7 +116,7 @@ Starting VM ...
 
 *docker-compose.yml*
 
-``` yaml
+```yaml
 web:
   build: .
   ports:
@@ -151,22 +152,22 @@ redis:
 
 现在万事俱备，该让我们使应用运行起来啦，构建镜像并运行服务：
 
-``` bash
+```bash
 $ docker-compose build
 $ docker-compose up -d
 ```
 
 别忘记要为项目初始化数据库哦：
 
-``` bash
+```bash
 $ docker-compose run web /usr/local/bin/python manage.py migrate
 ```
 
-这样我们的 Demo 就可以通过浏览器来访问了：）
+这样我们的 Demo 就可以通过浏览器来访问了
 
 **！！！**如果是使用 Docker Machine 的读者，您需要用
 
-``` bash
+```bash
 $ docker-machine ip dev
 ```
 
@@ -178,8 +179,8 @@ $ docker-machine ip dev
 
 #### 总结
 
-- Docker Machine 安装 Docker
-- Docker Compose 编排服务
-- 通过 Volume 将代码挂载入容器
-- 在开发状态下，容器只是单纯的运行环境
-- 通过 `docker-compose run service xxx` 执行 `xxx` 指令
+* Docker Machine 安装 Docker
+* Docker Compose 编排服务
+* 通过 Volume 将代码挂载入容器
+* 在开发状态下，容器只是单纯的运行环境
+* 通过 `docker-compose run service xxx` 执行 `xxx` 指令
