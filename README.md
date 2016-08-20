@@ -28,7 +28,7 @@ Docker 架构中常驻后台的系统进程，负责接收处理用户发送的�
 
 Docker 架构中用户与 Docker Daemon 建立通信的客户端。
 
-#### Docker Machine
+#### Docker Machine (!!deprecated)
 
 Docker 官方提供的部署工具。帮助用户快速在运行环境中创建虚拟机服务节点，在虚拟机中安装并配置 Docker，最终帮助用户配置 Docker Client，使得 Docker Client 有能力与虚拟机中的 Docker 建立通信。
 
@@ -36,7 +36,7 @@ Docker 官方提供的部署工具。帮助用户快速在运行环境中创建�
 
 Docker 官方提供的容器编排工具。随着服务的复杂度增长，容器管理过程的配置项将变得冗长，Compose 可有效帮助用户缓解甚至解决容器部署的复杂性。
 
-#### 通过 Docker Machine 安装 Docker
+#### 通过 Docker Machine 安装 Docker (!!deprecated)
 
 > 如果你是 Windows 或 OS X 用户推荐阅读以下章节，将指导您使用 Docker Machine 安装与管理 Docker。
 
