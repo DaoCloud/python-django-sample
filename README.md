@@ -125,7 +125,6 @@ web:
     - mysql:mysql
     - redis:redis
   env_file: .env
-  volume: . /code
   command: /code/manage.py runserver 0.0.0.0:8000
 
 mysql:
@@ -148,7 +147,6 @@ redis:
 - 通过 `links`，为 `web` 关联 `mysql` 与 `redis` 服务
 - 通过 `ports`，指定该服务需要公开的端口
 - 通过 `command`，指定该服务启动时执行的命令（可覆盖 Dockerfile 里的声明）
-- 通过 `volume`，将源码挂载至服务中，保证代码即时更新至开发环境中
 
 现在万事俱备，该让我们使应用运行起来啦，构建镜像并运行服务：
 
