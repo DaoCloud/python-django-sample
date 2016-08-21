@@ -179,6 +179,5 @@ $ docker-machine ip dev
 
 * Docker Machine 安装 Docker
 * Docker Compose 编排服务
-* 通过 Volume 将代码挂载入容器
 * 在开发状态下，容器只是单纯的运行环境
 * 通过 `docker-compose run service xxx` 执行 `xxx` 指令
